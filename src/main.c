@@ -129,12 +129,12 @@ void handle_init(AppContextRef ctx) {
     text_layer_set_text_alignment(&layer_text4, GTextAlignmentCenter);
     layer_add_child(&window.layer, &layer_text4.layer);
 
-	text_layer_init(&layer_text5, GRect(0, 70, 144, 70));
+    text_layer_init(&layer_text5, GRect(0, 70, 144, 70));
     text_layer_set_text_color(&layer_text5, GColorBlack);
     text_layer_set_background_color(&layer_text5, GColorClear);
     text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_14));
     text_layer_set_text_alignment(&layer_text5, GTextAlignmentLeft);
-	text_layer_set_overflow_mode(&layer_text5, GTextOverflowModeWordWrap);
+    text_layer_set_overflow_mode(&layer_text5, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text5.layer);
 
 }
