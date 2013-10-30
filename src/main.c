@@ -9,7 +9,7 @@
 
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
-int32_t cookie=54123;
+int32_t cookie=00000;
 
 char *strrev(char *);
 char *itoa(int, char *, int);
@@ -53,13 +53,13 @@ void http_success(int32_t request_id, int http_status, DictionaryIterator* recei
     Tuple* tuple2 = dict_find(received, 1);
     text_layer_set_text(&layer_text2, tuple1->value->cstring);
 
-    char* printed="preventcrashing";
+    static char* printed="1111111222222223333332222";
     strcpy(printed,"Device seen: ");
     strcat(printed, tuple2->value->cstring);
     strcat(printed, " times.");
-    char* cookie2="cookie:";
-    itoa(cookie, cookie2, 10);
-    char* newcookie=":IEKOOC HTTP ";
+    static char* cookie2="999999";
+	snprintf(cookie2, strlen(cookie2), "%ld", cookie);
+    static char* newcookie="HTTP COOKIE:      ";
     strcpy(newcookie,"HTTP COOKIE: ");
     strcat(newcookie,cookie2);
     text_layer_set_text(&layer_text3, printed);
@@ -72,8 +72,13 @@ void http_failure(int32_t request_id, int http_status, void* context) {
 }
 
 void window_appear(Window* me) {
-    DictionaryIterator* dict;
-    HTTPResult  result = http_out_get("http://ip.tocloud.us/pebip.php", cookie, &dict);
+    static char* url="http://ip.tocloud.us/pebip.php?cookie=123123";
+	static char* cookie2="999999";
+	snprintf(cookie2, strlen(cookie2), "%ld", cookie);
+	strcpy(url,"http://ip.tocloud.us/pebip.php?cookie=");
+	strcat(url,cookie2);
+	DictionaryIterator* dict;
+    HTTPResult  result = http_out_get(url, cookie, &dict);
     if (result != HTTP_OK) {
         httpebble_error(result);
         return;
