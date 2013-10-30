@@ -1,6 +1,14 @@
-The MIT License (MIT)
+Copyright (c) 2013 Daniel Carll, http://www.randomlylost.com/software
 
-Copyright (c) 2013 Daniel C
+Portions were created from other people's work and are Copyright
+to their respective authors. There may be snippets of other people's code as
+well, such as from 
+
+http.h,http.c: Copyright (C) 2013 Katharine Berry
+
+The gist that was the codebase that started the code was written by Matthew Tole,
+Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
+
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
