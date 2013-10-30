@@ -35,25 +35,32 @@
 #include <stdlib.h>
 #include "resource_ids.auto.h"
 
+#define ANDROID 1
+#ifdef ANDROID
+#define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x10, 0x34, 0xBF, 0xBE, 0x12, 0x98 }
+#else
 #define MY_UUID HTTP_UUID
+#endif
+	
 #define KEY_1 1
 #define KEY_2 2
 #define KEY_3 3
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
-int32_t cookie=0000000;
-int32_t random_number();
-int32_t get_cookie(int32_t);
+int32_t cookie=0000000; //I have this set to init the variable. It's changed later in the pbl_main()
+int32_t random_number(); //Returns a random number
+int32_t get_cookie(int32_t); //Changes the cookie so that it's unique per app run.
 
 void handle_init(AppContextRef ctx);
 void http_success(int32_t request_id, int http_status, DictionaryIterator* received, void* context);
 void http_failure(int32_t request_id, int http_status, void* context);
-void request_it();
 void httpebble_error(int error_code);
-void add_layers();
 
-void up_single_click_handler(ClickRecognizerRef recognizer, Window *window);
-void down_single_click_handler(ClickRecognizerRef recognizer, Window *window);
+void request_it(); //Send the actual HTTP request
+void add_layers(); //Draw the main screen
+
+void up_single_click_handler(ClickRecognizerRef recognizer, Window *window); //Handle whenever someone presses up.
+void down_single_click_handler(ClickRecognizerRef recognizer, Window *window); //Handle whenever someone presses down.
 void click_config_provider(ClickConfig **config, Window *window);
 
 Window window;
@@ -85,7 +92,6 @@ void pbl_main(void *params) {
     get_cookie(cookie);
     PebbleAppHandlers handlers = {
         .init_handler = &handle_init,
-
         .messaging_info = {
             .buffer_sizes = {
                 .inbound = 124,
@@ -98,19 +104,19 @@ void pbl_main(void *params) {
 }
 
 void http_success(int32_t request_id, int http_status, DictionaryIterator* received, void* context) {
-    char* printed="Device seen: XXXXX times.";
-    char* cookie2="HTTP COOKIE:            ";
+    char* printed="Device seen: XXXXX times."; //Setup/init the variable for the second layer
+    char* cookie2="HTTP COOKIE:            "; //Setup/init the variable for the layer5.
     if (request_id != cookie) {
         return;
     }
-    text_layer_set_text(&layer_text1, "IP detected:");
+    text_layer_set_text(&layer_text1, "IP detected:");//Overwrite this layer just in case there was an error between refreshes.
     Tuple* tuple1 = dict_find(received, 0);
     Tuple* tuple2 = dict_find(received, 1);
     text_layer_set_text(&layer_text2, tuple1->value->cstring);
     snprintf(printed, 30, "Device seen: %s times", tuple2->value->cstring);
     snprintf(cookie2, 30, "HTTP COOKIE: %ld", cookie);
     text_layer_set_text(&layer_text3, printed);
-    text_layer_set_text(&layer_text4, cookie2);
+    text_layer_set_text(&layer_text5, cookie2);
 }
 
 void http_failure(int32_t request_id, int http_status, void* context) {
@@ -118,18 +124,20 @@ void http_failure(int32_t request_id, int http_status, void* context) {
 }
 
 void request_it() {
-    static char* url="http://ip.tocloud.us/pebip.php?cookie=99999999";
-    snprintf(url, strlen(url), "http://ip.tocloud.us/pebip.php?cookie=%ld", cookie);
-    DictionaryIterator* dict;
-    HTTPResult  result = http_out_get(url, cookie, &dict);
+    static char* url="http://ip.tocloud.us/pebip.php";
+	DictionaryIterator* body;
+	char* cookie2="XXXXXXXX";
+	snprintf(cookie2, 8, "%ld", cookie);
+    
+	HTTPResult  result = http_out_get(url, cookie, &body);
     if (result != HTTP_OK) {
         httpebble_error(result);
         return;
     }
 
-    dict_write_cstring(dict, KEY_1, "test");
+	dict_write_int32(body, KEY_1, cookie);
 
-    result = http_out_send();
+	result = http_out_send();
     if (result != HTTP_OK) {
         httpebble_error(result);
         return;
@@ -137,7 +145,7 @@ void request_it() {
 }
 
 void handle_init(AppContextRef ctx) {
-    http_set_app_id(76782702);
+    http_set_app_id(76782799);
     resource_init_current_app(&APP_RESOURCES);
     http_register_callbacks((HTTPCallbacks) {
         .success = http_success,
@@ -245,7 +253,7 @@ void add_layers() {
     text_layer_set_text_alignment(&layer_text2, GTextAlignmentCenter);
     layer_add_child(&window.layer, &layer_text2.layer);
 
-    text_layer_init(&layer_text3, GRect(0, 44, 144, 30));
+    text_layer_init(&layer_text3, GRect(0, 40, 144, 30));
     text_layer_set_text_color(&layer_text3, GColorBlack);
     text_layer_set_background_color(&layer_text3, GColorClear);
     text_layer_set_font(&layer_text3, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -253,20 +261,20 @@ void add_layers() {
     text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text3.layer);
 
-    text_layer_init(&layer_text4, GRect(0, 122, 144, 30));
-    text_layer_set_text_color(&layer_text4, GColorBlack);
-    text_layer_set_background_color(&layer_text4, GColorClear);
-    text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-    text_layer_set_text_alignment(&layer_text4, GTextAlignmentCenter);
+    text_layer_init(&layer_text4, GRect(0, 65, 144, 60));
+    text_layer_set_text_color(&layer_text4, GColorWhite);
+    text_layer_set_background_color(&layer_text4, GColorBlack);
+    text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+    text_layer_set_text_alignment(&layer_text4, GTextAlignmentLeft);
     text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text4.layer);
+    text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the backgound. Press up or down to refresh.");
 
-    text_layer_init(&layer_text5, GRect(0, 70, 144, 48));
-    text_layer_set_text_color(&layer_text5, GColorWhite);
-    text_layer_set_background_color(&layer_text5, GColorBlack);
-    text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-    text_layer_set_text_alignment(&layer_text5, GTextAlignmentLeft);
+	text_layer_init(&layer_text5, GRect(0, 126, 144, 30));
+    text_layer_set_text_color(&layer_text5, GColorBlack);
+    text_layer_set_background_color(&layer_text5, GColorClear);
+    text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_text_alignment(&layer_text5, GTextAlignmentCenter);
     text_layer_set_overflow_mode(&layer_text5, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text5.layer);
-    text_layer_set_text(&layer_text5, "You may now close this app. It will wait for httpebble requests in the backgound.");
 }
