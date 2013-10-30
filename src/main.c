@@ -1,3 +1,33 @@
+/* Copyright (c) 2013 Daniel Carll, http://www.randomlylost.com/software
+*
+*  Portions were created from other people's work and are Copyright
+*  to their respective authors. There may be snippets of other people's code as
+*  well, such as from
+*
+*  http.h,http.c: Copyright (C) 2013 Katharine Berry
+*
+*  The gist that was the codebase that started the code was written by Matthew Tole,
+*  Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
+*
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy of
+*  this software and associated documentation files (the "Software"), to deal in
+*  the Software without restriction, including without limitation the rights to
+*  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+*  the Software, and to permit persons to whom the Software is furnished to do so,
+*  subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in all
+*  copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+*  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+*  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+*  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+*  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+*/
+
 #include "pebble_os.h"
 #include "pebble_app.h"
 #include "pebble_fonts.h"
@@ -10,9 +40,6 @@
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
 int32_t cookie=00000;
-
-char *strrev(char *);
-char *itoa(int, char *, int);
 int32_t random_number();
 int32_t get_cookie(int32_t);
 
@@ -33,7 +60,8 @@ void pbl_main(void *params) {
     get_cookie(cookie);
     PebbleAppHandlers handlers = {
         .init_handler = &handle_init,
-        .messaging_info = {
+		
+		.messaging_info = {
             .buffer_sizes = {
                 .inbound = 124,
                 .outbound = 256,
@@ -94,7 +122,6 @@ void window_appear(Window* me) {
 void handle_init(AppContextRef ctx) {
     http_set_app_id(76782702);
     resource_init_current_app(&APP_RESOURCES);
-
     http_register_callbacks((HTTPCallbacks) {
         .success = http_success,
          .failure = http_failure
@@ -111,6 +138,7 @@ void handle_init(AppContextRef ctx) {
     text_layer_set_background_color(&layer_text1, GColorClear);
     text_layer_set_font(&layer_text1, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text_alignment(&layer_text1, GTextAlignmentCenter);
+	text_layer_set_overflow_mode(&layer_text1, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text1.layer);
 
     text_layer_init(&layer_text2, GRect(0, 28, 144, 30));
@@ -141,7 +169,7 @@ void handle_init(AppContextRef ctx) {
     text_layer_set_text_alignment(&layer_text5, GTextAlignmentLeft);
     text_layer_set_overflow_mode(&layer_text5, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text5.layer);
-
+	
 }
 
 void httpebble_error(int error_code) {
@@ -196,32 +224,6 @@ void httpebble_error(int error_code) {
     }
     }
     text_layer_set_text(&layer_text1, error_message);
-}
-
-char *strrev(char *str) {
-    char *p1, *p2;
-    if (!str || !*str)
-        return str;
-
-    for (p1 = str, p2 = str + strlen(str) - 1; p2 > p1; ++p1, --p2) {
-        *p1 ^= *p2;
-        *p2 ^= *p1;
-        *p1 ^= *p2;
-    }
-    return str;
-}
-char *itoa(int n, char *s, int b) {
-    static char digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    int i=0, sign;
-    if ((sign = n) < 0)
-        n = -n;
-    do {
-        s[i++] = digits[n % b];
-    } while ((n /= b) > 0);
-    if (sign < 0)
-        s[i++] = '-';
-    s[i] = '\0';
-    return strrev(s);
 }
 
 int32_t get_cookie(int32_t s) {
