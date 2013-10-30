@@ -1,32 +1,32 @@
 /* Copyright (c) 2013 Daniel Carll, http://www.randomlylost.com/software
- * *
- * *  Portions were created from other people's work and are Copyright
- * *  to their respective authors. There may be snippets of other people's code as
- * *  well, such as from
- * *
- * *  http.h,http.c: Copyright (C) 2013 Katharine Berry
- * *
- * *  The gist that was the codebase that started the code was written by Matthew Tole,
- * *  Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
- * *
- * *
- * *  Permission is hereby granted, free of charge, to any person obtaining a copy of
- * *  this software and associated documentation files (the "Software"), to deal in
- * *  the Software without restriction, including without limitation the rights to
- * *  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
- * *  the Software, and to permit persons to whom the Software is furnished to do so,
- * *  subject to the following conditions:
- * *
- * *  The above copyright notice and this permission notice shall be included in all
- * *  copies or substantial portions of the Software.
- * *
- * *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
- * *  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
- * *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
- * */
+*
+*  Portions were created from other people's work and are Copyright
+*  to their respective authors. There may be snippets of other people's code as
+*  well, such as from
+*
+*  http.h,http.c: Copyright (C) 2013 Katharine Berry
+*
+*  The gist that was the codebase that started the code was written by Matthew Tole,
+*  Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
+*
+*
+*  Permission is hereby granted, free of charge, to any person obtaining a copy of
+*  this software and associated documentation files (the "Software"), to deal in
+*  the Software without restriction, including without limitation the rights to
+*  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+*  the Software, and to permit persons to whom the Software is furnished to do so,
+*  subject to the following conditions:
+*
+*  The above copyright notice and this permission notice shall be included in all
+*  copies or substantial portions of the Software.
+*
+*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+*  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+*  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+*  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+*  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+*/
 
 #include "pebble_os.h"
 #include "pebble_app.h"
@@ -35,32 +35,27 @@
 #include <stdlib.h>
 #include "resource_ids.auto.h"
 
-#define ANDROID 1
-#ifdef ANDROID
-#define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x10, 0x34, 0xBF, 0xBE, 0x12, 0x98 }
-#else
 #define MY_UUID HTTP_UUID
-#endif
-	
 #define KEY_1 1
 #define KEY_2 2
 #define KEY_3 3
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
-int32_t cookie=0000000; //I have this set to init the variable. It's changed later in the pbl_main()
-int32_t random_number(); //Returns a random number
-int32_t get_cookie(int32_t); //Changes the cookie so that it's unique per app run.
+int32_t cookie=0000000;
+int32_t random_number();
+int32_t get_cookie(int32_t);
 
 void handle_init(AppContextRef ctx);
 void http_success(int32_t request_id, int http_status, DictionaryIterator* received, void* context);
 void http_failure(int32_t request_id, int http_status, void* context);
+void request_it();
 void httpebble_error(int error_code);
+void add_layers();
+void deinit(AppContextRef ctx);
+void reconnect(void* context);
 
-void request_it(); //Send the actual HTTP request
-void add_layers(); //Draw the main screen
-
-void up_single_click_handler(ClickRecognizerRef recognizer, Window *window); //Handle whenever someone presses up.
-void down_single_click_handler(ClickRecognizerRef recognizer, Window *window); //Handle whenever someone presses down.
+void up_single_click_handler(ClickRecognizerRef recognizer, Window *window);
+void down_single_click_handler(ClickRecognizerRef recognizer, Window *window);
 void click_config_provider(ClickConfig **config, Window *window);
 
 Window window;
@@ -71,28 +66,29 @@ TextLayer layer_text4;
 TextLayer layer_text5;
 
 void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
-    request_it();
-    vibes_short_pulse();
+request_it();
+vibes_short_pulse();
 }
 
 void down_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
-    request_it();
+	request_it();
 }
 
 void click_config_provider(ClickConfig **config, Window *window) {
-
-    config[BUTTON_ID_UP]->click.handler = (ClickHandler) up_single_click_handler;
-    config[BUTTON_ID_UP]->click.repeat_interval_ms = 100;
-
-    config[BUTTON_ID_DOWN]->click.handler = (ClickHandler) down_single_click_handler;
-    config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 100;
+  
+  config[BUTTON_ID_UP]->click.handler = (ClickHandler) up_single_click_handler;
+  config[BUTTON_ID_UP]->click.repeat_interval_ms = 100;
+  
+  config[BUTTON_ID_DOWN]->click.handler = (ClickHandler) down_single_click_handler;
+  config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 100;
 }
 
 void pbl_main(void *params) {
     get_cookie(cookie);
     PebbleAppHandlers handlers = {
         .init_handler = &handle_init,
-        .messaging_info = {
+		.deinit_handler = &deinit,
+		.messaging_info = {
             .buffer_sizes = {
                 .inbound = 124,
                 .outbound = 256,
@@ -104,19 +100,19 @@ void pbl_main(void *params) {
 }
 
 void http_success(int32_t request_id, int http_status, DictionaryIterator* received, void* context) {
-    char* printed="Device seen: XXXXX times."; //Setup/init the variable for the second layer
-    char* cookie2="HTTP COOKIE:            "; //Setup/init the variable for the layer5.
-    if (request_id != cookie) {
+char* printed="Device seen: XXXXX times.";
+char* cookie2="HTTP COOKIE:            ";
+	if (request_id != cookie) {
         return;
     }
-    text_layer_set_text(&layer_text1, "IP detected:");//Overwrite this layer just in case there was an error between refreshes.
-    Tuple* tuple1 = dict_find(received, 0);
+    text_layer_set_text(&layer_text1, "IP detected:");
+	Tuple* tuple1 = dict_find(received, 0);
     Tuple* tuple2 = dict_find(received, 1);
     text_layer_set_text(&layer_text2, tuple1->value->cstring);
-    snprintf(printed, 30, "Device seen: %s times", tuple2->value->cstring);
-    snprintf(cookie2, 30, "HTTP COOKIE: %ld", cookie);
+	snprintf(printed, 30, "Device seen: %s times", tuple2->value->cstring);
+	snprintf(cookie2, 30, "HTTP COOKIE: %ld", cookie);
     text_layer_set_text(&layer_text3, printed);
-    text_layer_set_text(&layer_text5, cookie2);
+    text_layer_set_text(&layer_text4, cookie2);
 }
 
 void http_failure(int32_t request_id, int http_status, void* context) {
@@ -124,20 +120,18 @@ void http_failure(int32_t request_id, int http_status, void* context) {
 }
 
 void request_it() {
-    static char* url="http://ip.tocloud.us/pebip.php";
-	DictionaryIterator* body;
-	char* cookie2="XXXXXXXX";
-	snprintf(cookie2, 8, "%ld", cookie);
-    
-	HTTPResult  result = http_out_get(url, cookie, &body);
+	static char* url="http://ip.tocloud.us/pebip.php?cookie=99999999";
+	snprintf(url, strlen(url), "http://ip.tocloud.us/pebip.php?cookie=%ld", cookie);
+	DictionaryIterator* dict;
+    HTTPResult  result = http_out_get(url, cookie, &dict);
     if (result != HTTP_OK) {
         httpebble_error(result);
         return;
     }
 
-	dict_write_int32(body, KEY_1, cookie);
-
-	result = http_out_send();
+	dict_write_cstring(dict, KEY_1, "test");
+	
+    result = http_out_send();
     if (result != HTTP_OK) {
         httpebble_error(result);
         return;
@@ -145,21 +139,35 @@ void request_it() {
 }
 
 void handle_init(AppContextRef ctx) {
-    http_set_app_id(76782799);
+    http_set_app_id(76782702);
     resource_init_current_app(&APP_RESOURCES);
     http_register_callbacks((HTTPCallbacks) {
         .success = http_success,
-         .failure = http_failure
+        .failure = http_failure,
+		.reconnect=reconnect
     }, (void*)ctx);
 
     window_init(&window, "External IP");
     window_stack_push(&window, true);
     window_set_click_config_provider(&window, (ClickConfigProvider) click_config_provider);
+	window_set_fullscreen(&window, true);
+	
 
-    add_layers();
-    request_it();
+	//  window_set_window_handlers(&window, (WindowHandlers) {
+//      .appear  = window_appear
+//  });
+
+add_layers();
+request_it();	
 }
 
+void deinit(AppContextRef ctx) {
+	layer_remove_from_parent(&layer_text1.layer);
+	layer_remove_from_parent(&layer_text2.layer);
+	layer_remove_from_parent(&layer_text3.layer);
+	layer_remove_from_parent(&layer_text4.layer);
+	layer_remove_from_parent(&layer_text5.layer);
+}
 void httpebble_error(int error_code) {
 
     static char error_message[] = "UNKNOWN_HTTP_ERRROR_CODE_GENERATED";
@@ -236,45 +244,49 @@ int32_t random_number(int32_t min_num,int32_t max_num)
     return result;
 }
 
-void add_layers() {
-    text_layer_init(&layer_text1, GRect(0, 0, 144, 26));
+void add_layers(){    
+	text_layer_init(&layer_text1, GRect(0, 0, 144, 26));
     text_layer_set_text_color(&layer_text1, GColorBlack);
     text_layer_set_background_color(&layer_text1, GColorClear);
     text_layer_set_font(&layer_text1, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_text_alignment(&layer_text1, GTextAlignmentCenter);
-    text_layer_set_overflow_mode(&layer_text1, GTextOverflowModeWordWrap);
+	text_layer_set_overflow_mode(&layer_text1, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text1.layer);
-
+					  
     text_layer_init(&layer_text2, GRect(0, 18, 144, 30));
     text_layer_set_text_color(&layer_text2, GColorBlack);
     text_layer_set_background_color(&layer_text2, GColorClear);
     text_layer_set_font(&layer_text2, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
     text_layer_set_overflow_mode(&layer_text2, GTextOverflowModeWordWrap);
-    text_layer_set_text_alignment(&layer_text2, GTextAlignmentCenter);
+	text_layer_set_text_alignment(&layer_text2, GTextAlignmentCenter);
     layer_add_child(&window.layer, &layer_text2.layer);
 
-    text_layer_init(&layer_text3, GRect(0, 40, 144, 30));
+    text_layer_init(&layer_text3, GRect(0, 44, 144, 30));
     text_layer_set_text_color(&layer_text3, GColorBlack);
     text_layer_set_background_color(&layer_text3, GColorClear);
     text_layer_set_font(&layer_text3, fonts_get_system_font(FONT_KEY_GOTHIC_18));
     text_layer_set_text_alignment(&layer_text3, GTextAlignmentCenter);
     text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
-    layer_add_child(&window.layer, &layer_text3.layer);
+	layer_add_child(&window.layer, &layer_text3.layer);
 
-    text_layer_init(&layer_text4, GRect(0, 65, 144, 60));
-    text_layer_set_text_color(&layer_text4, GColorWhite);
-    text_layer_set_background_color(&layer_text4, GColorBlack);
-    text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_14));
-    text_layer_set_text_alignment(&layer_text4, GTextAlignmentLeft);
+    text_layer_init(&layer_text4, GRect(0, 122, 144, 30));
+    text_layer_set_text_color(&layer_text4, GColorBlack);
+    text_layer_set_background_color(&layer_text4, GColorClear);
+    text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_18));
+    text_layer_set_text_alignment(&layer_text4, GTextAlignmentCenter);
     text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
-    layer_add_child(&window.layer, &layer_text4.layer);
-    text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the backgound. Press up or down to refresh.");
+	layer_add_child(&window.layer, &layer_text4.layer);
 
-	text_layer_init(&layer_text5, GRect(0, 126, 144, 30));
-    text_layer_set_text_color(&layer_text5, GColorBlack);
-    text_layer_set_background_color(&layer_text5, GColorClear);
-    text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_18));
-    text_layer_set_text_alignment(&layer_text5, GTextAlignmentCenter);
+    text_layer_init(&layer_text5, GRect(0, 70, 144, 48));
+    text_layer_set_text_color(&layer_text5, GColorWhite);
+    text_layer_set_background_color(&layer_text5, GColorBlack);
+    text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+    text_layer_set_text_alignment(&layer_text5, GTextAlignmentLeft);
     text_layer_set_overflow_mode(&layer_text5, GTextOverflowModeWordWrap);
     layer_add_child(&window.layer, &layer_text5.layer);
+	text_layer_set_text(&layer_text5, "You may now close this app. It will wait for httpebble requests in the background.");				 
+				 }
+
+void reconnect(void* context) {
+	request_it();
 }
