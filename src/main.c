@@ -36,12 +36,16 @@
 #include "resource_ids.auto.h"
 #define MY_UUID HTTP_UUID
 
-#define KEY_1 1
+#define MY_KEY1 1
+#define MY_KEY2 2
+
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
 int32_t cookie=0000000;
+
 int32_t get_cookie(int32_t);
 int32_t random_number();
+void request_it(int32_t);
 
 void add_layers();
 void deinit(AppContextRef ctx);
@@ -50,10 +54,9 @@ void httpebble_error(int error_code);
 void http_success(int32_t request_id, int http_status, DictionaryIterator* received, void* context);
 void http_failure(int32_t request_id, int http_status, void* context);
 void reconnect(void* context);
-void request_it();
-
 
 void up_single_click_handler(ClickRecognizerRef recognizer, Window* window);
+void select_single_click_handler(ClickRecognizerRef recognizer, Window* window);
 void down_single_click_handler(ClickRecognizerRef recognizer, Window* window);
 void click_config_provider(ClickConfig** config, Window* window);
 
@@ -116,14 +119,14 @@ void add_layers()
 	text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text3.layer);
 	
-	text_layer_init(&layer_text4, GRect(0, 64, 144, 75));
+	text_layer_init(&layer_text4, GRect(0, 64, 144, 72));
 	text_layer_set_text_color(&layer_text4, GColorWhite);
 	text_layer_set_background_color(&layer_text4, GColorBlack);
-	text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+	text_layer_set_font(&layer_text4, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUPEE_10)));
 	text_layer_set_text_alignment(&layer_text4, GTextAlignmentLeft);
 	text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text4.layer);
-	text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the background. Press up or down button to refresh within the app.");
+	text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the background. Refresh: UP (lighton), DOWN (lightoff), MIDDLE clears the count/deletes pebbleid from server.");
 	
 	text_layer_init(&layer_text5, GRect(0, 140, 144, 30));
 	text_layer_set_text_color(&layer_text5, GColorBlack);
@@ -141,6 +144,7 @@ void deinit(AppContextRef ctx)
 	layer_remove_from_parent(&layer_text3.layer);
 	layer_remove_from_parent(&layer_text4.layer);
 	layer_remove_from_parent(&layer_text5.layer);
+	light_enable(false);
 }
 
 void handle_init(AppContextRef ctx)
@@ -157,7 +161,8 @@ void handle_init(AppContextRef ctx)
 	window_set_click_config_provider(&window, (ClickConfigProvider) click_config_provider);
 	window_set_fullscreen(&window, true);
 	add_layers();
-	request_it();
+	int32_t clear=0;
+	request_it(clear);
 }
 
 void httpebble_error(int error_code)
@@ -240,10 +245,11 @@ void http_failure(int32_t request_id, int http_status, void* context)
 
 void reconnect(void* context)
 {
-	request_it();
+	int32_t clear=0;
+	request_it(clear);
 }
 
-void request_it()
+void request_it(int32_t clear)
 {
 	static char* url="http://ip.tocloud.us/pebip.php";
 	DictionaryIterator* dict;
@@ -253,7 +259,9 @@ void request_it()
 			httpebble_error(result);
 			return;
 		}
-	dict_write_int32(dict, KEY_1, cookie);
+	dict_write_int32(dict, MY_KEY1, cookie);
+	dict_write_int32(dict, MY_KEY2, clear);
+	
 	result = http_out_send();
 	if(result != HTTP_OK)
 		{
@@ -264,18 +272,28 @@ void request_it()
 
 void up_single_click_handler(ClickRecognizerRef recognizer, Window* window)
 {
-	request_it();
+	int32_t clear=0;
+	request_it(clear);
+	light_enable(true);
 }
 
+void select_single_click_handler(ClickRecognizerRef recognizer, Window* window){
+	int32_t clear=1;
+	request_it(clear);
+}
 void down_single_click_handler(ClickRecognizerRef recognizer, Window* window)
 {
-	request_it();
+	int32_t clear=0;
+	request_it(clear);
+	light_enable(false);
 }
 
 void click_config_provider(ClickConfig** config, Window* window)
 {
 	config[BUTTON_ID_UP]->click.handler = (ClickHandler) up_single_click_handler;
 	config[BUTTON_ID_UP]->click.repeat_interval_ms = 100;
+	config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_single_click_handler;
+	config[BUTTON_ID_SELECT]->click.repeat_interval_ms = 100;
 	config[BUTTON_ID_DOWN]->click.handler = (ClickHandler) down_single_click_handler;
 	config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 100;
 }
