@@ -34,14 +34,7 @@
 #include "http.h"
 #include <stdlib.h>
 #include "resource_ids.auto.h"
-
-#define ANDROID TRUE
-
-#if ANDROID
-#define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x10, 0x34, 0xBF, 0xBE, 0x12, 0x97 }
-#else
 #define MY_UUID HTTP_UUID
-#endif
 
 #define KEY_1 1
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
@@ -272,7 +265,6 @@ void request_it()
 void up_single_click_handler(ClickRecognizerRef recognizer, Window* window)
 {
 	request_it();
-	vibes_short_pulse();
 }
 
 void down_single_click_handler(ClickRecognizerRef recognizer, Window* window)
