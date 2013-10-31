@@ -1,32 +1,32 @@
 /* Copyright (c) 2013 Daniel Carll, http://www.randomlylost.com/software
-*
-*  Portions were created from other people's work and are Copyright
-*  to their respective authors. There may be snippets of other people's code as
-*  well, such as from
-*
-*  http.h,http.c: Copyright (C) 2013 Katharine Berry
-*
-*  The gist that was the codebase that started the code was written by Matthew Tole,
-*  Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
-*
-*
-*  Permission is hereby granted, free of charge, to any person obtaining a copy of
-*  this software and associated documentation files (the "Software"), to deal in
-*  the Software without restriction, including without limitation the rights to
-*  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-*  the Software, and to permit persons to whom the Software is furnished to do so,
-*  subject to the following conditions:
-*
-*  The above copyright notice and this permission notice shall be included in all
-*  copies or substantial portions of the Software.
-*
-*  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-*  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-*  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-*  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-*  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-*  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
-*/
+ * *
+ * *  Portions were created from other people's work and are Copyright
+ * *  to their respective authors. There may be snippets of other people's code as
+ * *  well, such as from
+ * *
+ * *  http.h,http.c: Copyright (C) 2013 Katharine Berry
+ * *
+ * *  The gist that was the codebase that started the code was written by Matthew Tole,
+ * *  Copyright (C) 2013, Matthew Tole, https://gist.github.com/matthewtole
+ * *
+ * *
+ * *  Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * *  this software and associated documentation files (the "Software"), to deal in
+ * *  the Software without restriction, including without limitation the rights to
+ * *  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * *  the Software, and to permit persons to whom the Software is furnished to do so,
+ * *  subject to the following conditions:
+ * *
+ * *  The above copyright notice and this permission notice shall be included in all
+ * *  copies or substantial portions of the Software.
+ * *
+ * *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * *  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * *  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * *  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * *  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE
+ * */
 
 #include "pebble_os.h"
 #include "pebble_app.h"
@@ -102,7 +102,6 @@ void add_layers()
 	text_layer_set_text_alignment(&layer_text1, GTextAlignmentCenter);
 	text_layer_set_overflow_mode(&layer_text1, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text1.layer);
-	
 	text_layer_init(&layer_text2, GRect(0, 18, 144, 30));
 	text_layer_set_text_color(&layer_text2, GColorBlack);
 	text_layer_set_background_color(&layer_text2, GColorClear);
@@ -110,7 +109,6 @@ void add_layers()
 	text_layer_set_overflow_mode(&layer_text2, GTextOverflowModeWordWrap);
 	text_layer_set_text_alignment(&layer_text2, GTextAlignmentCenter);
 	layer_add_child(&window.layer, &layer_text2.layer);
-	
 	text_layer_init(&layer_text3, GRect(0, 40, 144, 30));
 	text_layer_set_text_color(&layer_text3, GColorBlack);
 	text_layer_set_background_color(&layer_text3, GColorClear);
@@ -118,7 +116,6 @@ void add_layers()
 	text_layer_set_text_alignment(&layer_text3, GTextAlignmentCenter);
 	text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text3.layer);
-	
 	text_layer_init(&layer_text4, GRect(0, 64, 144, 72));
 	text_layer_set_text_color(&layer_text4, GColorWhite);
 	text_layer_set_background_color(&layer_text4, GColorBlack);
@@ -127,7 +124,6 @@ void add_layers()
 	text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text4.layer);
 	text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the background. Refresh: UP (lighton), DOWN (lightoff), MIDDLE clears the count/deletes pebbleid from server.");
-	
 	text_layer_init(&layer_text5, GRect(0, 140, 144, 30));
 	text_layer_set_text_color(&layer_text5, GColorBlack);
 	text_layer_set_background_color(&layer_text5, GColorClear);
@@ -261,7 +257,6 @@ void request_it(int32_t clear)
 		}
 	dict_write_int32(dict, MY_KEY1, cookie);
 	dict_write_int32(dict, MY_KEY2, clear);
-	
 	result = http_out_send();
 	if(result != HTTP_OK)
 		{
@@ -277,7 +272,8 @@ void up_single_click_handler(ClickRecognizerRef recognizer, Window* window)
 	light_enable(true);
 }
 
-void select_single_click_handler(ClickRecognizerRef recognizer, Window* window){
+void select_single_click_handler(ClickRecognizerRef recognizer, Window* window)
+{
 	int32_t clear=1;
 	request_it(clear);
 }
