@@ -35,7 +35,14 @@
 #include <stdlib.h>
 #include "resource_ids.auto.h"
 
+#define ANDROID TRUE
+
+#if ANDROID
+#define MY_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x10, 0x34, 0xBF, 0xBE, 0x12, 0x97 }
+#else
 #define MY_UUID HTTP_UUID
+#endif
+
 #define KEY_1 1
 PBL_APP_INFO(MY_UUID, "External IP", "Daniel Carll", 1, 0,  RESOURCE_ID_IMAGE_MENU_ICON_BLACK, APP_INFO_STANDARD_APP);
 
@@ -108,7 +115,7 @@ void add_layers()
 	text_layer_set_text_alignment(&layer_text2, GTextAlignmentCenter);
 	layer_add_child(&window.layer, &layer_text2.layer);
 	
-	text_layer_init(&layer_text3, GRect(0, 44, 144, 30));
+	text_layer_init(&layer_text3, GRect(0, 40, 144, 30));
 	text_layer_set_text_color(&layer_text3, GColorBlack);
 	text_layer_set_background_color(&layer_text3, GColorClear);
 	text_layer_set_font(&layer_text3, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -116,7 +123,7 @@ void add_layers()
 	text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text3.layer);
 	
-	text_layer_init(&layer_text4, GRect(0, 70, 144, 75));
+	text_layer_init(&layer_text4, GRect(0, 64, 144, 75));
 	text_layer_set_text_color(&layer_text4, GColorWhite);
 	text_layer_set_background_color(&layer_text4, GColorBlack);
 	text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_14));
@@ -124,8 +131,8 @@ void add_layers()
 	text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text4.layer);
 	text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the background. Press up or down button to refresh within the app.");
-
-	text_layer_init(&layer_text5, GRect(0, 145, 144, 30));
+	
+	text_layer_init(&layer_text5, GRect(0, 140, 144, 30));
 	text_layer_set_text_color(&layer_text5, GColorBlack);
 	text_layer_set_background_color(&layer_text5, GColorClear);
 	text_layer_set_font(&layer_text5, fonts_get_system_font(FONT_KEY_GOTHIC_18));
@@ -145,7 +152,6 @@ void deinit(AppContextRef ctx)
 
 void handle_init(AppContextRef ctx)
 {
-	http_set_app_id(76782702);
 	resource_init_current_app(&APP_RESOURCES);
 	http_register_callbacks((HTTPCallbacks)
 	{
