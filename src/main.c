@@ -116,14 +116,14 @@ void add_layers()
 	text_layer_set_text_alignment(&layer_text3, GTextAlignmentCenter);
 	text_layer_set_overflow_mode(&layer_text3, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text3.layer);
-	text_layer_init(&layer_text4, GRect(0, 64, 144, 72));
+	text_layer_init(&layer_text4, GRect(0, 64, 144, 75));
 	text_layer_set_text_color(&layer_text4, GColorWhite);
 	text_layer_set_background_color(&layer_text4, GColorBlack);
-	text_layer_set_font(&layer_text4, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_RUPEE_10)));
+	text_layer_set_font(&layer_text4, fonts_get_system_font(FONT_KEY_GOTHIC_14));
 	text_layer_set_text_alignment(&layer_text4, GTextAlignmentLeft);
 	text_layer_set_overflow_mode(&layer_text4, GTextOverflowModeWordWrap);
 	layer_add_child(&window.layer, &layer_text4.layer);
-	text_layer_set_text(&layer_text4, "You may now close this app. It will wait for httpebble requests in the background. Refresh: UP (lighton), DOWN (lightoff), MIDDLE clears the count/deletes pebbleid from server.");
+	text_layer_set_text(&layer_text4, "This will listen for httpebble requests in the background. Refresh: UP (lighton), DOWN (lightoff), MIDDLE clears seen count.");
 	text_layer_init(&layer_text5, GRect(0, 140, 144, 30));
 	text_layer_set_text_color(&layer_text5, GColorBlack);
 	text_layer_set_background_color(&layer_text5, GColorClear);
@@ -247,7 +247,7 @@ void reconnect(void* context)
 
 void request_it(int32_t clear)
 {
-	static char* url="http://ip.tocloud.us/pebip.php";
+	static char* url="http://mypeb.pw/pebip.php";
 	DictionaryIterator* dict;
 	HTTPResult  result = http_out_get(url, cookie, &dict);
 	if(result != HTTP_OK)

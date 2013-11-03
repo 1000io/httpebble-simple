@@ -1,11 +1,6 @@
 {
     "media": [
         {
-            "defName": "FONT_RUPEE_10",
-            "type": "font",
-            "file": "fonts/Rupee_Foradian.ttf"
-        },
-        {
             "defName": "IMAGE_MENU_ICON",
             "type": "png-trans",
             "file": "images/icon1.png"
